@@ -1,12 +1,17 @@
-import extract_data
-import CNN_data
+"""Main. Point d'entrer du programme."""
 
-file = "data_set/MIN 30000110701346.txt"
-data = extract_data.extract_data_from_txt(file)
-label_file = "data_set/30000110701346_label.txt"
-label = extract_data.extract_label_from_txt(label_file)
-input_data = data.Value.values.astype(int)
-print(input_data)
+import CNN
+from CNN_data import get_data_sets
 
-samples = CNN_data.create_samples(input_data, 2016)
-print(samples)
+TrainX, Trainy, ValidX, Validy, Test = get_data_sets(CNN.input_length)
+
+cnn = CNN.compile_and_fit(TrainX, Trainy, ValidX, Validy)
+cnn.summary()
+
+
+"""
+TODO:
+    - Optimiser les hyperparamètres (nombres de filtres pour les couches de Convolution,
+      nombre de neurones pour les couches Dense, taille des séries temporelles à donner en entrer au CNN, etc.)
+    - Evaluer le modèle avec Test
+"""

@@ -1,59 +1,68 @@
-# CNN : Dans ce fichier, on définit le modèle et les fonctions qui permettent de l'entraîner et de l'utiliser.
+"""Define CNN's architecture and functions (training, prediction)."""
 
-import pandas as pd
+import os
+from keras.models import load_model
 from keras.models import Sequential
 from keras.layers import Conv1D, BatchNormalization, MaxPooling1D, Flatten, Dropout, Dense
 
 # Variables d'entraînement
-n_epochs = 10
+n_epochs = 1
 batch_size = 64
-verbose = 1
+verbose = True
 
 # Hyperparamètres
 n_filters = 64
 kernel_size = 3
 pool_size = 2
-Dense1 = 64
-Dense2 = 32
-Dense3 = 16
-dropout = 0.2
-padding = "same"
-input_shape = (2016, 1)    # Série temporelle univariable constituée de 100 valeurs
-output = 42                # Le nombre de classes
+dense1 = 64
+dense2 = 32
+dense3 = 16
+output = 3              # Le nombre de classes
+input_length = 100      # Longueur des entrées à donner au CNN
 
 
-# Crée et entraîne le modèle
 def compile_and_fit(trainX, trainy, validX, validy):
+    """Build and train the model. Load it if it has already been trained."""
+
+    # Load the model if already trained
+    backup_file = "model_backup/" + str(n_epochs) + "epochs_" + str(input_length) + "input_length.cnn"
+    if os.path.exists(backup_file):
+        return load_model(backup_file)
+
+    # Else, build new model
     model = Sequential()
-    # Couche de convolution 1
-    model.add(
-        Conv1D(filters=n_filters, kernel_size=kernel_size, padding=padding, activation="relu", input_shape=input_shape))
-    # ???
+
+    # Convolution layer 1 (input layer)
+    model.add(Conv1D(filters=n_filters, kernel_size=kernel_size, padding="same",
+                     activation="relu", input_shape=(input_length, 1)))
     model.add(BatchNormalization())
-    #
     model.add(MaxPooling1D(pool_size=pool_size))
-    # Couche de convolution 2
-    model.add(Conv1D(filters=n_filters, kernel_size=kernel_size, padding=padding, activation="relu"))
+
+    # Convolution layer 2
+    model.add(Conv1D(filters=n_filters, kernel_size=kernel_size, padding="same", activation="relu"))
     model.add(BatchNormalization())
     model.add(MaxPooling1D(pool_size=pool_size))
     model.add(Flatten())
 
-    model.add(Dense(Dense1, activation="tanh"))
-    model.add(Dropout(dropout))
-    model.add(Dense(Dense2, activation="tanh"))
-    model.add(Dropout(dropout))
-    model.add(Dense(Dense3, activation="relu"))
-    model.add(Dropout(dropout))
+    # 3 Dense layers
+    model.add(Dense(dense1, activation="tanh"))
+    model.add(Dropout(0.2))
+    model.add(Dense(dense2, activation="tanh"))
+    model.add(Dropout(0.2))
+    model.add(Dense(dense3, activation="relu"))
+    model.add(Dropout(0.2))
+
+    # Dense layer (output layer)
     model.add(Dense(output, activation="softmax"))
 
+    # Train network
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    # fit network
-    model.fit(trainX, trainy, epochs=n_epochs, batch_size=batch_size, verbose=verbose)
-    # evaluate model
-    _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=0)
+    model.fit(trainX, trainy, validation_data=(validX, validy), epochs=n_epochs, batch_size=batch_size, verbose=verbose)
+    model.save(backup_file)
 
-    return accuracy
+    return model
 
-# Utilise le CNN pour prédire le type de bâtiment à partir de la série temporelle
+
 def predict(CNN, time_series):
-    return CNN.predict(times_series)
+    """Utilise le CNN pour prédire le type de bâtiment à partir d'une série temporelle."""
+    return CNN.predict(time_series)

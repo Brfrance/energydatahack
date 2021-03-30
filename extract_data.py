@@ -4,6 +4,7 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def extract_data_from_txt(file, verbose=False):
     """
     Extract data from file
@@ -33,17 +34,25 @@ def extract_data_from_txt(file, verbose=False):
         'Date': indexes,
         'Value': values
     })
-    
-    df_subset = df[df['Date'] >= pd.Timestamp(2014,12,31,0,0,0)]    
-    plt.plot(df_subset['Date'], df_subset['Value'])
+
     if verbose:
+        df_subset = df[df['Date'] >= pd.Timestamp(2014,12,31,0,0,0)]
+        plt.plot(df_subset['Date'], df_subset['Value'])
         plt.show()
 
     return df
 
+
 def extract_label_from_txt(filename):
+    """Get building type and building function."""
     with open(filename, 'r') as in_file:
         txt = in_file.readline()
         split = txt.split(";")
-        print(txt)
     return split[0], split[1][:-1]
+
+
+def get_labels(filename):
+    """Get all building types and building functions."""
+    with open(filename, 'r') as in_file:
+        read = in_file.readline()
+    return read.split(";")
