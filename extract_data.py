@@ -1,4 +1,10 @@
-def extract_data_from_txt(file):
+import csv
+from datetime import datetime
+from datetime import timedelta
+import matplotlib.pyplot as plt
+import pandas as pd
+
+def extract_data_from_txt(file, verbose=False):
     """
     Extract data from file
     """
@@ -30,3 +36,14 @@ def extract_data_from_txt(file):
     
     df_subset = df[df['Date'] >= pd.Timestamp(2014,12,31,0,0,0)]    
     plt.plot(df_subset['Date'], df_subset['Value'])
+    if verbose:
+        plt.show()
+
+    return df
+
+def extract_label_from_txt(filename):
+    with open(filename, 'r') as in_file:
+        txt = in_file.readline()
+        split = txt.split(";")
+        print(txt)
+    return split[0], split[1][:-1]

@@ -37,6 +37,8 @@ def create_label_files(data_set_inventory, data_set_link_chorus_rae):
 
     print(files)
 
+    list_labels = list()
+
     for filename in files:
 
         s = filename.split(" ")
@@ -55,7 +57,16 @@ def create_label_files(data_set_inventory, data_set_link_chorus_rae):
         if labels == None:
             continue
 
+        if labels[0] not in list_labels:
+            list_labels.append(labels[0])
+
         write_label_file(RAE, labels)
+
+    f = open("labels.txt", "w")
+    for l in list_labels[:-1]:
+        f.write(l + ";")
+    f.write(list_labels[-1])
+    f.close()
 
         
 
