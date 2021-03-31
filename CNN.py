@@ -7,19 +7,20 @@ from keras.models import Sequential
 from keras.layers import Conv1D, BatchNormalization, MaxPooling1D, Flatten, Dropout, Dense
 
 # Variables d'entraînement
-n_epochs = 1
+n_epochs = 5
 batch_size = 64
 verbose = True
 
 # Hyperparamètres
-n_filters = 64
+n_filters1 = 128
+n_filters2 = 64
 kernel_size = 3
 pool_size = 2
-dense1 = 64
-dense2 = 32
-dense3 = 16
-output = 3              # Le nombre de classes
-input_length = 1      # Longueur des entrées à donner au CNN
+dense1 = 128
+dense2 = 64
+dense3 = 32
+output = 3               # Le nombre de classes
+input_length = 1008      # Longueur des entrées à donner au CNN
 
 
 def compile_and_fit(trainX, trainy, validX, validy, testX, testy):
@@ -34,13 +35,13 @@ def compile_and_fit(trainX, trainy, validX, validy, testX, testy):
     model = Sequential()
 
     # Convolution layer 1 (input layer)
-    model.add(Conv1D(filters=n_filters, kernel_size=kernel_size, padding="same",
+    model.add(Conv1D(filters=n_filters1, kernel_size=kernel_size, padding="same",
                      activation="relu", input_shape=(input_length, 1)))
     model.add(BatchNormalization())
     model.add(MaxPooling1D(pool_size, padding="same"))
 
     # Convolution layer 2
-    model.add(Conv1D(filters=n_filters, kernel_size=kernel_size, padding="same", activation="relu"))
+    model.add(Conv1D(filters=n_filters2, kernel_size=kernel_size, padding="same", activation="relu"))
     model.add(BatchNormalization())
     model.add(MaxPooling1D(pool_size, padding="same"))
     model.add(Flatten())
