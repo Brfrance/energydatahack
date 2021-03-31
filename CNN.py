@@ -8,7 +8,7 @@ from keras.layers import Conv1D, BatchNormalization, MaxPooling1D, Flatten, Drop
 
 # Variables d'entraînement
 n_epochs = 5
-batch_size = 64
+batch_size = 128
 verbose = True
 
 # Hyperparamètres
