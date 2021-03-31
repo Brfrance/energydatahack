@@ -48,7 +48,7 @@ def get_data_sets(cnn_n_input):
     # Train/Validation/Test
     trainX, trainy = list(), list()
     validX, validy = list(), list()
-    Test = list()
+    testX, testy = list(), list()
 
     # Loop over data_set directory
     files = [f for f in os.listdir("data_set/") if fnmatch.fnmatch(f, "*_label.txt")]
@@ -80,24 +80,23 @@ def get_data_sets(cnn_n_input):
 
         # Decide whether these data should be used for training/validation/testing
         label_id = label_to_int[label[0]]
-        if count_labels[label[0]] % 5 == 1:             # 20% of data is for testing
-            test = (input_data, to_categorical([[label_id]], dtype="int8", num_classes=n_labels))
-            Test.append(test)
-        else:
-            # Split data into samples
-            X = create_samples(input_data, cnn_n_input)
-            X = X.reshape(X.shape[0], X.shape[1], 1)
-            # Create respective Y values
-            Y = to_categorical([[label_id] for _ in X], dtype="uint8", num_classes=n_labels)
+        # Split data into samples
+        X = create_samples(input_data, cnn_n_input)
+        X = X.reshape(X.shape[0], X.shape[1], 1)
+        # Create respective Y values
+        Y = to_categorical([[label_id] for _ in X], dtype="uint8", num_classes=n_labels)
 
-            if count_labels[label[0]] % 5 == 2:         # 20% of data is for validation
-                # Append validation samples
-                validX.append(X)
-                validy.append(Y)
-            else:                                       # 60% of data is for training
-                # Append training samples
-                trainX.append(X)
-                trainy.append(Y)
+        if count_labels[label[0]] % 5 == 1:             # 20% of data is for testing
+            testX.append(X)
+            testy.append(Y)
+        elif count_labels[label[0]] % 5 == 2:           # 20% of data is for validation
+            # Append validation samples
+            validX.append(X)
+            validy.append(Y)
+        else:                                           # 60% of data is for training
+            # Append training samples
+            trainX.append(X)
+            trainy.append(Y)
 
     print("--\nInventaire des données globales :")
     print(count_labels)
@@ -108,10 +107,11 @@ def get_data_sets(cnn_n_input):
     Trainy = concatenate([y for y in trainy])
     ValidX = concatenate([x for x in validX])
     Validy = concatenate([y for y in validy])
+    TestX = concatenate([x for x in testX])
+    Testy = concatenate([y for y in testy])
 
     print("Training set:\n\t", TrainX.shape)
     print("Validation set:\n\t", ValidX.shape)
+    print("Test set:\n\t", TestX.shape)
 
-    print(Test)
-
-    return TrainX, Trainy, ValidX, Validy, Test
+    return TrainX, Trainy, ValidX, Validy, TestX, Testy
