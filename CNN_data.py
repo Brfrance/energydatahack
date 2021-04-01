@@ -3,7 +3,7 @@
 import os
 import fnmatch
 import extract_data
-from numpy import array, concatenate
+from numpy import array, concatenate, mean
 from keras.utils import to_categorical
 
 
@@ -34,7 +34,8 @@ def get_data_sets(cnn_n_input):
     """Prepare training, validation and testing sets."""
 
     # Get list of labels
-    list_labels = extract_data.get_labels("data_set/labels.txt")
+    data_directory = "data_set/"
+    list_labels = extract_data.get_labels(data_directory + "labels.txt")
     n_labels = len(list_labels)
 
     # Dictionary that gives labels ID
@@ -51,22 +52,19 @@ def get_data_sets(cnn_n_input):
     testX, testy = list(), list()
 
     # Loop over data_set directory
-    files = [f for f in os.listdir("data_set/") if fnmatch.fnmatch(f, "*_label.txt")]
+    files = [f for f in os.listdir(data_directory) if fnmatch.fnmatch(f, "*_label.txt")]
     for file in files:
 
         # Get chorus code
         chorus = file.split('_')[0]
 
         # Get time series (data)
-        input_data = extract_data.extract_data_from_txt("data_set/MIN " + chorus + ".txt") \
-            .Value.values.astype(dtype="uint16", copy=False)
+        input_data = extract_data.extract_data_from_txt(data_directory + "MIN " + chorus + ".txt").Value.values\
+            .astype(dtype="uint16", copy=False)
+        input_data = mean(input_data.reshape(-1, 3), 1).reshape(-1, 1)
 
         # Get respective label
-        label = extract_data.extract_label_from_txt("data_set/" + file)
-
-        print("--")
-        print(file)
-        print(label)
+        label = extract_data.extract_label_from_txt(data_directory + file)
 
         # Increment label count
         if label[0] in count_labels:
@@ -86,10 +84,10 @@ def get_data_sets(cnn_n_input):
         # Create respective Y values
         Y = to_categorical([[label_id] for _ in X], dtype="uint8", num_classes=n_labels)
 
-        if count_labels[label[0]] % 5 == 1:             # 20% of data is for testing
+        if count_labels[label[0]] % 5 == 7:             # 20% of data is for testing
             testX.append(X)
             testy.append(Y)
-        elif count_labels[label[0]] % 5 == 2:           # 20% of data is for validation
+        elif count_labels[label[0]] % 5 == 3:           # 20% of data is for validation
             # Append validation samples
             validX.append(X)
             validy.append(Y)
@@ -107,11 +105,11 @@ def get_data_sets(cnn_n_input):
     Trainy = concatenate([y for y in trainy])
     ValidX = concatenate([x for x in validX])
     Validy = concatenate([y for y in validy])
-    TestX = concatenate([x for x in testX])
-    Testy = concatenate([y for y in testy])
+    # TestX = concatenate([x for x in testX])
+    # Testy = concatenate([y for y in testy])
 
     print("Training set:\n\t", TrainX.shape)
     print("Validation set:\n\t", ValidX.shape)
-    print("Test set:\n\t", TestX.shape)
+    # print("Test set:\n\t", TestX.shape)
 
-    return TrainX, Trainy, ValidX, Validy, TestX, Testy
+    return TrainX, Trainy, ValidX, Validy, None, None

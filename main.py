@@ -11,10 +11,3 @@ TrainX, Trainy, ValidX, Validy, TestX, Testy = get_data_sets(CNN.input_length)
 
 cnn = CNN.compile_and_fit(TrainX, Trainy, ValidX, Validy, TestX, Testy)
 print(cnn)
-
-"""
-TODO:
-    - Optimiser les hyperparamètres (nombres de filtres pour les couches de Convolution,
-      nombre de neurones pour les couches Dense, taille des séries temporelles à donner en entrer au CNN, etc.)
-    - Evaluer le modèle avec Test
-"""
