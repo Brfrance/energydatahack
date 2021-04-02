@@ -3,7 +3,7 @@
 import os
 import fnmatch
 import extract_data
-from numpy import array, concatenate, mean
+from numpy import array, concatenate, mean, split
 from keras.utils import to_categorical
 
 
@@ -28,6 +28,13 @@ def create_samples(time_series, n_steps):
         # Gather input and output parts of the pattern
         X.append(time_series[i:end_ix])
     return array(X, dtype="uint16")
+
+
+def split_samples(time_series, n_steps):
+    ret = split(time_series, n_steps)
+    if ret[-1].shape[0] < n_steps:
+        return array(ret[:-1], dtype="uint16")
+    return array(ret, dtype="uint16")
 
 
 def get_data_sets(cnn_n_input):
@@ -61,7 +68,7 @@ def get_data_sets(cnn_n_input):
         # Get time series (data)
         input_data = extract_data.extract_data_from_txt(data_directory + "MIN " + chorus + ".txt").Value.values\
             .astype(dtype="uint16", copy=False)
-        input_data = mean(input_data.reshape(-1, 3), 1).reshape(-1, 1)
+        # input_data = mean(input_data.reshape(-1, 3), 1)
 
         # Get respective label
         label = extract_data.extract_label_from_txt(data_directory + file)
@@ -79,8 +86,8 @@ def get_data_sets(cnn_n_input):
         # Decide whether these data should be used for training/validation/testing
         label_id = label_to_int[label[0]]
         # Split data into samples
-        X = create_samples(input_data, cnn_n_input)
-        X = X.reshape(X.shape[0], X.shape[1], 1)
+        X = split_samples(input_data, cnn_n_input)
+        X = X.reshape(X.shape[1], X.shape[0], 1)
         # Create respective Y values
         Y = to_categorical([[label_id] for _ in X], dtype="uint8", num_classes=n_labels)
 

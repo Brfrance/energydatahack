@@ -8,21 +8,21 @@ from keras.models import Sequential
 from keras.layers import Conv1D, BatchNormalization, MaxPooling1D, Flatten, Dropout, Dense
 
 # Training variables
-n_epochs = 20
+n_epochs = 50
 batch_size = 64
 verbose = True
 learning_rate = 0.00001
 dropout = 0.4
 
 # Hyperparameters
-n_filters1 = 4
-n_filters2 = 2
+n_filters1 = 8
+n_filters2 = 8
 kernel_size = 2
 pool_size = 2
-dense1 = 4
-dense2 = 2
-output = 3                # Number of classes
-input_length = 48         # CNN input length
+dense1 = 8
+dense2 = 4
+output = 3                 # Number of classes
+input_length = 144         # CNN input length
 
 
 def compile_and_fit(trainX, trainy, validX, validy, testX, testy):
@@ -59,7 +59,7 @@ def compile_and_fit(trainX, trainy, validX, validy, testX, testy):
     model.add(Dense(output, activation="softmax"))
 
     # Train network
-    model.compile(loss='categorical_crossentropy', optimizer='SGD', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='Adam', metrics=['accuracy'])
     bkd.set_value(model.optimizer.learning_rate, learning_rate)
     history = model.fit(trainX, trainy, validation_data=(validX, validy), epochs=n_epochs, batch_size=batch_size,
                         verbose=verbose)
