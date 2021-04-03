@@ -2,3 +2,6 @@ pandas
 matplotlib
 Keras
 tensorflow
+scikit-learn
+xlrd
+seaborn
