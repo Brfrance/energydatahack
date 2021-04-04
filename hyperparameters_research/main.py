@@ -7,5 +7,5 @@ from CNN_data import get_data_sets
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
-data_partition = get_data_sets(CNN.input_length)
+data_partition = get_data_sets(CNN.input_length, data_directory="data_set/", n_data_sets=4, normalize=False)
 CNN.loop_hyperparameters(data_partition)

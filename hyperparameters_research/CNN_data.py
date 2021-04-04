@@ -3,8 +3,8 @@
 import os
 import fnmatch
 import extract_data
-from numpy import array, mean
 from sklearn import preprocessing
+from numpy import array, split, mean
 from keras.utils import to_categorical
 
 
@@ -31,7 +31,22 @@ def create_samples(time_series, n_steps):
     return array(X, dtype="uint16")
 
 
-def get_data_sets(cnn_n_input, data_directory="../data_set/", n_data_sets=7):
+def creayte_samples(time_series, n_steps):
+    """
+    Split a time series into samples of size n_steps.
+    Example :
+        time_series = [1, 2, 3, 4]
+        n_steps = 2
+        create_samples(time_series, n_steps) = [ [1, 2], [3, 4] ]
+    """
+
+    ret = split(time_series, n_steps)
+    if ret[-1].shape[0] < n_steps:
+        return array(ret[:-1], dtype="uint16")
+    return array(ret, dtype="uint16")
+
+
+def get_data_sets(cnn_n_input, data_directory="../data_set/", n_data_sets=7, normalize=True):
     """
     Retrieve data and partition it into n_data_sets for cross-validation.
     """
@@ -58,7 +73,7 @@ def get_data_sets(cnn_n_input, data_directory="../data_set/", n_data_sets=7):
     for file in files:
 
         # Get label
-        label = extract_data.extract_label_from_txt(data_directory + file)[0]
+        label = extract_data.extract_label_from_txt(data_directory + file)[1]
         # Increment label count
         if label in count_labels:
             count_labels[label] += 1
@@ -71,9 +86,10 @@ def get_data_sets(cnn_n_input, data_directory="../data_set/", n_data_sets=7):
         data = extract_data.extract_data_from_txt(data_directory + "MIN " + file.split('_')[0] + ".txt")\
             .Value.values.astype(dtype="uint16", copy=False)
         # Downsampling
-        data = mean(data.reshape(-1, 3), 1).reshape(-1, 1)
+        data = mean(data.reshape(-1, 6), 1).reshape(-1, 1)
         # Normalize data
-        data = preprocessing.normalize(data).reshape(-1, 1)
+        if normalize:
+            data = preprocessing.normalize(data.reshape(-1, 1)).reshape(-1, 1)
         # Split data into samples
         data = create_samples(data, cnn_n_input)
         # Reshape for CNN
